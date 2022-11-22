@@ -1,0 +1,10 @@
+[package]
+name = "spotify_queue"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rocket = "0.5.0-rc.2"
+rspotify = { version = "0.11.5", features = ["env-file", "client-ureq", "ureq-rustls-tls"], default-features = false }
