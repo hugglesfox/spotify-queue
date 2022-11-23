@@ -1,17 +1,17 @@
-use rocket::{response::Redirect, State};
-use rspotify::{prelude::*, AuthCodeSpotify};
-use std::sync::{Arc, Mutex};
+use crate::SpotifyGuard;
+use rocket::response::Redirect;
+use rspotify::prelude::*;
 
 #[get("/")]
-pub fn index(spotify: &State<Arc<Mutex<AuthCodeSpotify>>>) -> Redirect {
+pub fn index(spotify: &SpotifyGuard) -> crate::Result<Redirect> {
     let spotify = spotify.lock().unwrap();
-    let auth_url = spotify.get_authorize_url(true).unwrap();
-    Redirect::to(auth_url)
+    let auth_url = spotify.get_authorize_url(true)?;
+    Ok(Redirect::to(auth_url))
 }
 
 #[get("/callback?<code>")]
-pub fn callback(spotify: &State<Arc<Mutex<AuthCodeSpotify>>>, code: &str) -> &'static str {
+pub fn callback(spotify: &SpotifyGuard, code: &str) -> crate::Result<&'static str> {
     let mut spotify = spotify.lock().unwrap();
-    spotify.request_token(code).unwrap();
-    "Done!"
+    spotify.request_token(code)?;
+    Ok("Done!")
 }

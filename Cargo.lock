@@ -847,14 +847,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "mixitup_spotify"
-version = "0.1.0"
-dependencies = [
- "rocket",
- "rspotify",
-]
-
-[[package]]
 name = "multer"
 version = "2.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1456,6 +1448,15 @@ name = "spin"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f6002a767bff9e83f8eeecf883ecb8011875a21ae8da43bffb817a57e78cc09"
+
+[[package]]
+name = "spotify_queue"
+version = "0.1.0"
+dependencies = [
+ "rocket",
+ "rspotify",
+ "thiserror",
+]
 
 [[package]]
 name = "stable-pattern"

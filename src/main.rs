@@ -1,10 +1,15 @@
 #[macro_use]
 extern crate rocket;
 
+mod error;
 mod routes;
 
 use rspotify::{scopes, AuthCodeSpotify, Credentials, OAuth};
+use rocket::State;
 use std::sync::{Arc, Mutex};
+
+type SpotifyGuard = State<Arc<Mutex<AuthCodeSpotify>>>;
+type Result<T> = std::result::Result<T, error::Error>;
 
 #[launch]
 fn rocket() -> _ {
@@ -23,7 +28,7 @@ fn rocket() -> _ {
             routes::auth::index,
             routes::auth::callback,
             routes::queue::add,
-            routes::queue::skip
+            routes::queue::skip,
         ],
     )
 }
