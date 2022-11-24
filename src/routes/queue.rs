@@ -21,10 +21,9 @@ pub fn add(spotify: &SpotifyGuard, q: &str) -> crate::Result<String> {
     let spotify = spotify.lock().unwrap();
 
     let track = search(q, &spotify)?;
-    println!("{:?}", track);
-    spotify.add_item_to_queue(&track.id.unwrap(), None)?;
+    spotify.add_item_to_queue(&track.id.ok_or(Error::TrackNotFound)?, None)?;
 
-    Ok(format!("Queueing: {}", track.name))
+    Ok(format!("Queueing: \"{}\"", track.name))
 }
 
 #[get("/skip")]

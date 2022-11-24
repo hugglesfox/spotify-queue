@@ -5,7 +5,6 @@ mod error;
 mod routes;
 
 use rocket::State;
-use rspotify::clients::oauth::OAuthClient;
 use rspotify::{scopes, AuthCodeSpotify, Credentials, OAuth, Config};
 use std::sync::{Arc, Mutex};
 
@@ -28,7 +27,7 @@ fn rocket() -> _ {
         ..Default::default()
     };
 
-    let mut spotify = AuthCodeSpotify::with_config(creds, oauth, config);
+    let spotify = AuthCodeSpotify::with_config(creds, oauth, config);
 
     rocket::build()
         .manage(Arc::new(Mutex::new(spotify)))
