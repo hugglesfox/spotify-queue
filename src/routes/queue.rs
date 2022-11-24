@@ -1,19 +1,30 @@
+use crate::error::Error;
 use crate::SpotifyGuard;
+use rspotify::AuthCodeSpotify;
 use rspotify::{model::SearchResult, model::SearchType, prelude::*};
+use rspotify::model::track::FullTrack;
+
+fn search(query: &str, spotify: &AuthCodeSpotify) -> crate::Result<FullTrack> {
+    let result = spotify
+        .search(query, &SearchType::Track, None, None, Some(1), None)?;
+    
+    let page = match result {
+        SearchResult::Tracks(p) => Ok(p),
+        _ => Err(Error::TrackNotFound),
+    }?;
+
+    page.items.get(0).ok_or(Error::TrackNotFound).cloned()
+}
 
 #[get("/queue?<q>")]
 pub fn add(spotify: &SpotifyGuard, q: &str) -> crate::Result<String> {
     let spotify = spotify.lock().unwrap();
-    let result = spotify
-        .search(q, &SearchType::Track, None, None, Some(1), None)?;
-    let track = match result {
-        SearchResult::Tracks(page) => Some(page.items[0].clone()),
-        _ => None,
-    }
-    .unwrap();
 
+    let track = search(q, &spotify)?;
+    println!("{:?}", track);
     spotify.add_item_to_queue(&track.id.unwrap(), None)?;
-    Ok(format!("Queueing {}", track.name))
+
+    Ok(format!("Queueing: {}", track.name))
 }
 
 #[get("/skip")]
