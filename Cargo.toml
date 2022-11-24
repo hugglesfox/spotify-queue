@@ -6,6 +6,11 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rocket = "0.5.0-rc.2"
-rspotify = { version = "0.11.5", features = ["env-file", "client-ureq", "ureq-rustls-tls"], default-features = false }
-thiserror = "1.0.37"
+base64 = "0.13.1"
+oauth2 = "4.3.0"
+pretty_env_logger = "0.4.0"
+rand = "0.8.5"
+reqwest = { version = "0.11.13", features = ["json"] }
+rspotify-model = "0.11.5"
+tokio = { version = "1.22.0", features = ["full"] }
+warp = "0.3.3"

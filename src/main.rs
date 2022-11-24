@@ -1,34 +1,45 @@
-#[macro_use]
-extern crate rocket;
+mod filters;
+mod handlers;
+mod spotify;
 
-mod error;
-mod routes;
+use reqwest::Client;
+use oauth2::{
+    AuthorizationCode,
+    AuthUrl,
+    ClientId,
+    ClientSecret,
+    CsrfToken,
+    PkceCodeChallenge,
+    RedirectUrl,
+    Scope,
+    TokenResponse,
+    TokenUrl
+};
+use oauth2::basic::BasicClient;
+use oauth2::reqwest::async_http_client;
 
-use rspotify::{scopes, AuthCodeSpotify, Credentials, OAuth};
-use rocket::State;
-use std::sync::{Arc, Mutex};
+const SPOTIFY_SCOPE: &str = "user-modify-playback-state";
 
-type SpotifyGuard = State<Arc<Mutex<AuthCodeSpotify>>>;
-type Result<T> = std::result::Result<T, error::Error>;
+#[tokio::main]
+async fn main() {
+    pretty_env_logger::init();
 
-#[launch]
-fn rocket() -> _ {
-    let creds = Credentials::from_env().unwrap();
-    let oauth = OAuth {
-        redirect_uri: "http://localhost:8000/callback/".to_string(),
-        scopes: scopes!("user-modify-playback-state"),
-        ..Default::default()
-    };
 
-    let spotify = AuthCodeSpotify::new(creds, oauth);
+    let client =
+        BasicClient::new(
+            ClientId::new("client_id".to_string()),
+            Some(ClientSecret::new("client_secret".to_string())),
+            AuthUrl::new("http://authorize".to_string()).unwrap(),
+            Some(TokenUrl::new("http://token".to_string()).unwrap())
+        )
+        .set_redirect_uri(RedirectUrl::new("http://redirect".to_string()).unwrap());
 
-    rocket::build().manage(Arc::new(Mutex::new(spotify))).mount(
-        "/",
-        routes![
-            routes::auth::index,
-            routes::auth::callback,
-            routes::queue::add,
-            routes::queue::skip,
-        ],
-    )
+    let (auth_url, csrf_token) = client
+            .authorize_url(CsrfToken::new_random)
+            .add_scope(Scope::new("read".to_string()))
+            .add_scope(Scope::new("write".to_string()))
+            .url();
+
+    let index = warp::any();
+    warp::serve(index).run(([127, 0, 0, 1], 8000)).await
 }
